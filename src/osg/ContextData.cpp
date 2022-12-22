@@ -37,6 +37,7 @@ ContextData::~ContextData()
 void ContextData::newFrame(osg::FrameStamp* frameStamp)
 {
     // OSG_NOTICE<<"ContextData::newFrame("<<frameStamp->getFrameNumber()<<")"<<std::endl;
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_managerMapMutex);
     for(ManagerMap::iterator itr = _managerMap.begin();
         itr != _managerMap.end();
         ++itr)
@@ -48,6 +49,7 @@ void ContextData::newFrame(osg::FrameStamp* frameStamp)
 
 void ContextData::resetStats()
 {
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_managerMapMutex);
     for(ManagerMap::iterator itr = _managerMap.begin();
         itr != _managerMap.end();
         ++itr)
@@ -59,6 +61,7 @@ void ContextData::resetStats()
 
 void ContextData::reportStats(std::ostream& out)
 {
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_managerMapMutex);
     for(ManagerMap::iterator itr = _managerMap.begin();
         itr != _managerMap.end();
         ++itr)
@@ -70,6 +73,7 @@ void ContextData::reportStats(std::ostream& out)
 
 void ContextData::recomputeStats(std::ostream& out) const
 {
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_managerMapMutex);
     for(ManagerMap::const_iterator itr = _managerMap.begin();
         itr != _managerMap.end();
         ++itr)
@@ -83,6 +87,7 @@ void ContextData::recomputeStats(std::ostream& out) const
 void ContextData::flushDeletedGLObjects(double currentTime, double& availableTime)
 {
     // OSG_NOTICE<<"ContextData::flushDeletedGLObjects("<<currentTime<<","<<availableTime<<")"<<std::endl;
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_managerMapMutex);
     for(ManagerMap::iterator itr = _managerMap.begin();
         itr != _managerMap.end();
         ++itr)
@@ -95,6 +100,7 @@ void ContextData::flushDeletedGLObjects(double currentTime, double& availableTim
 void ContextData::flushAllDeletedGLObjects()
 {
     // OSG_NOTICE<<"ContextData::flushAllDeletedGLObjects()"<<std::endl;
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_managerMapMutex);
     for(ManagerMap::iterator itr = _managerMap.begin();
         itr != _managerMap.end();
         ++itr)
@@ -107,6 +113,7 @@ void ContextData::flushAllDeletedGLObjects()
 void ContextData::deleteAllGLObjects()
 {
     // OSG_NOTICE<<"ContextData::deleteAllGLObjects()"<<std::endl;
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_managerMapMutex);
     for(ManagerMap::iterator itr = _managerMap.begin();
         itr != _managerMap.end();
         ++itr)
@@ -119,6 +126,7 @@ void ContextData::deleteAllGLObjects()
 void ContextData::discardAllGLObjects()
 {
     // OSG_NOTICE<<"ContextData::discardAllGLObjects()"<<std::endl;
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_managerMapMutex);
     for(ManagerMap::iterator itr = _managerMap.begin();
         itr != _managerMap.end();
         ++itr)
