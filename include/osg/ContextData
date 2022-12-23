@@ -37,13 +37,19 @@ class OSG_EXPORT ContextData : public GraphicsObjectManager
         template<typename T>
         T* get()
         {
-            const std::type_info* id(&typeid(T));
-            osg::ref_ptr<osg::Referenced>& ptr = _managerMap[id];
-            if (!ptr)
+            osg::ref_ptr<RefManagerMap> currentManagerMap;
+            if (_observedManagerMap.lock(currentManagerMap))
             {
-                ptr = new T(_contextID);
+                std::string id(typeid(T).name());
+
+                ManagerMap::iterator itr = currentManagerMap->find(id);
+                if (itr!=currentManagerMap->end())
+                    return static_cast<T*>(itr->second.get());
             }
-            return static_cast<T*>(ptr.get());
+
+            T* ptr = new T(_contextID);
+            set(ptr);
+            return ptr;
         }
 
         /** Get a specific GL extensions object or GraphicsObjectManager if it already exists in the extension map.
@@ -52,18 +58,32 @@ class OSG_EXPORT ContextData : public GraphicsObjectManager
         template<typename T>
         const T* get() const
         {
-            const std::type_info* id(&typeid(T));
-            ManagerMap::const_iterator itr = _managerMap.find(id);
-            if (itr==_managerMap.end()) return 0;
-            else return itr->second.get();
+            std::string id(typeid(T).name());
+
+            osg::ref_ptr<RefManagerMap> currentManagerMap;
+            if (_observedManagerMap.lock(currentManagerMap))
+            {
+                ManagerMap::const_iterator itr = currentManagerMap->find(id);
+                if (itr== currentManagerMap->end()) return 0;
+                else return itr->second.get();
+            }
         }
 
         /** Set a specific GL extensions object pr GraphicsObjectManager. */
         template<typename T>
         void set(T* ptr)
         {
-            const std::type_info* id(&typeid(T));
-            _managerMap[id] = ptr;
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_managerMapMutex);
+
+            std::string id(typeid(T).name());
+            RefManagerMap* newManagerMap = new RefManagerMap;
+
+            if (_observedManagerMap.valid())
+                *newManagerMap = *_observedManagerMap;
+            (*newManagerMap)[id] = ptr;
+
+            _managerMap = newManagerMap;
+            _observedManagerMap = _managerMap;
         }
 
         /** Signal that a new frame has started.*/
@@ -137,8 +157,11 @@ class OSG_EXPORT ContextData : public GraphicsObjectManager
         osg::ref_ptr<osg::GraphicsContext> _compileContext;
 
         // ManagerMap contains GL Extentsions objects used by StateAttribue to call OpenGL extensions/advanced features
-        typedef std::map<const std::type_info*, osg::ref_ptr<osg::Referenced> > ManagerMap;
-        ManagerMap _managerMap;
+        typedef std::map<std::string, osg::ref_ptr<osg::Referenced> > ManagerMap;
+        class RefManagerMap : public osg::Referenced, public ManagerMap {};
+        osg::ref_ptr<RefManagerMap> _managerMap;
+        osg::observer_ptr<RefManagerMap> _observedManagerMap;
+        OpenThreads::Mutex _managerMapMutex;
 };
 
 

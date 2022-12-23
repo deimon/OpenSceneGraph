@@ -37,45 +37,61 @@ ContextData::~ContextData()
 void ContextData::newFrame(osg::FrameStamp* frameStamp)
 {
     // OSG_NOTICE<<"ContextData::newFrame("<<frameStamp->getFrameNumber()<<")"<<std::endl;
-    for(ManagerMap::iterator itr = _managerMap.begin();
-        itr != _managerMap.end();
-        ++itr)
+    osg::ref_ptr<RefManagerMap> currentManagerMap;
+    if(_observedManagerMap.lock(currentManagerMap))
     {
-        osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
-        if (gom) gom->newFrame(frameStamp);
+        for(ManagerMap::iterator itr = currentManagerMap->begin();
+            itr != currentManagerMap->end();
+            ++itr)
+        {
+            osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
+            if (gom) gom->newFrame(frameStamp);
+        }
     }
 }
 
 void ContextData::resetStats()
 {
-    for(ManagerMap::iterator itr = _managerMap.begin();
-        itr != _managerMap.end();
-        ++itr)
+    osg::ref_ptr<RefManagerMap> currentManagerMap;
+    if(_observedManagerMap.lock(currentManagerMap))
     {
-        osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
-        if (gom) gom->resetStats();
+        for(ManagerMap::iterator itr = currentManagerMap->begin();
+            itr != currentManagerMap->end();
+            ++itr)
+        {
+            osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
+            if (gom) gom->resetStats();
+        }
     }
 }
 
 void ContextData::reportStats(std::ostream& out)
 {
-    for(ManagerMap::iterator itr = _managerMap.begin();
-        itr != _managerMap.end();
-        ++itr)
+    osg::ref_ptr<RefManagerMap> currentManagerMap;
+    if(_observedManagerMap.lock(currentManagerMap))
     {
-        osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
-        if (gom) gom->reportStats(out);
+        for(ManagerMap::iterator itr = currentManagerMap->begin();
+            itr != currentManagerMap->end();
+            ++itr)
+        {
+            osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
+            if (gom) gom->reportStats(out);
+        }
     }
 }
 
 void ContextData::recomputeStats(std::ostream& out) const
 {
-    for(ManagerMap::const_iterator itr = _managerMap.begin();
-        itr != _managerMap.end();
-        ++itr)
+    osg::ref_ptr<RefManagerMap> currentManagerMap;
+    if(_observedManagerMap.lock(currentManagerMap))
     {
-        osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
-        if (gom) gom->recomputeStats(out);
+        for(ManagerMap::const_iterator itr = currentManagerMap->begin();
+            itr != currentManagerMap->end();
+            ++itr)
+        {
+            osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
+            if (gom) gom->recomputeStats(out);
+        }
     }
 }
 
@@ -83,48 +99,64 @@ void ContextData::recomputeStats(std::ostream& out) const
 void ContextData::flushDeletedGLObjects(double currentTime, double& availableTime)
 {
     // OSG_NOTICE<<"ContextData::flushDeletedGLObjects("<<currentTime<<","<<availableTime<<")"<<std::endl;
-    for(ManagerMap::iterator itr = _managerMap.begin();
-        itr != _managerMap.end();
-        ++itr)
+    osg::ref_ptr<RefManagerMap> currentManagerMap;
+    if(_observedManagerMap.lock(currentManagerMap))
     {
-        osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
-        if (gom) gom->flushDeletedGLObjects(currentTime, availableTime);
+        for(ManagerMap::iterator itr = currentManagerMap->begin();
+            itr != currentManagerMap->end();
+            ++itr)
+        {
+            osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
+            if (gom) gom->flushDeletedGLObjects(currentTime, availableTime);
+        }
     }
 }
 
 void ContextData::flushAllDeletedGLObjects()
 {
     // OSG_NOTICE<<"ContextData::flushAllDeletedGLObjects()"<<std::endl;
-    for(ManagerMap::iterator itr = _managerMap.begin();
-        itr != _managerMap.end();
-        ++itr)
+    osg::ref_ptr<RefManagerMap> currentManagerMap;
+    if(_observedManagerMap.lock(currentManagerMap))
     {
-        osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
-        if (gom) gom->flushAllDeletedGLObjects();
+        for(ManagerMap::iterator itr = currentManagerMap->begin();
+            itr != currentManagerMap->end();
+            ++itr)
+        {
+            osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
+            if (gom) gom->flushAllDeletedGLObjects();
+        }
     }
 }
 
 void ContextData::deleteAllGLObjects()
 {
     // OSG_NOTICE<<"ContextData::deleteAllGLObjects()"<<std::endl;
-    for(ManagerMap::iterator itr = _managerMap.begin();
-        itr != _managerMap.end();
-        ++itr)
+    osg::ref_ptr<RefManagerMap> currentManagerMap;
+    if(_observedManagerMap.lock(currentManagerMap))
     {
-        osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
-        if (gom) gom->deleteAllGLObjects();
+        for(ManagerMap::iterator itr = currentManagerMap->begin();
+            itr != currentManagerMap->end();
+            ++itr)
+        {
+            osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
+            if (gom) gom->deleteAllGLObjects();
+        }
     }
 }
 
 void ContextData::discardAllGLObjects()
 {
     // OSG_NOTICE<<"ContextData::discardAllGLObjects()"<<std::endl;
-    for(ManagerMap::iterator itr = _managerMap.begin();
-        itr != _managerMap.end();
-        ++itr)
+    osg::ref_ptr<RefManagerMap> currentManagerMap;
+    if(_observedManagerMap.lock(currentManagerMap))
     {
-        osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
-        if (gom) gom->discardAllGLObjects();
+        for(ManagerMap::iterator itr = currentManagerMap->begin();
+            itr != currentManagerMap->end();
+            ++itr)
+        {
+            osg::GraphicsObjectManager* gom = dynamic_cast<osg::GraphicsObjectManager*>(itr->second.get());
+            if (gom) gom->discardAllGLObjects();
+        }
     }
 }
 
